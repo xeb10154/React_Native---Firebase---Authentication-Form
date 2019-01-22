@@ -4,25 +4,17 @@ import firebase from 'firebase';
 import { Button, Card, CardSection, Input, Spinner } from './common';
 
 class LoginForm extends Component {
-  state = {
-    email: '',
-    password: '',
-    error: '',
-    loading: false
-  };
-
+  state = { email: '', password: '', error: '', loading: false };
 
   onButtonPress() {
     const { email, password } = this.state;
 
     this.setState({ error: '', loading: true });
 
-    // .auth() returns a promise
-    // .catch deals with any failed attempts to login
+
     firebase.auth().signInWithEmailAndPassword(email, password)
     .then(this.onLoginSuccess.bind(this))
     .catch(() => {
-      // make account here
       firebase.auth().createUserWithEmailAndPassword(email, password)
       .then(this.onLoginSuccess.bind(this))
       .catch(this.onLoginFail.bind(this));
@@ -34,13 +26,19 @@ class LoginForm extends Component {
   }
 
   onLoginSuccess() {
-    this.setState({ email: '', password: '', loading: false, error: '' });
+    this.setState({
+      email: '',
+      password: '',
+      loading: false,
+      error: ''
+    });
   }
 
   renderButton() {
     if (this.state.loading) {
       return <Spinner size="small" />;
     }
+
     return (
       <Button onPress={this.onButtonPress.bind(this)}>
         Log in
@@ -53,7 +51,7 @@ class LoginForm extends Component {
       <Card>
         <CardSection>
           <Input
-            placeholder="example@gmail.com"
+            placeholder="user@gmail.com"
             label="Email"
             value={this.state.email}
             onChangeText={email => this.setState({ email })}
@@ -80,7 +78,6 @@ class LoginForm extends Component {
       </Card>
     );
   }
-
 }
 
 const styles = {
