@@ -1,29 +1,51 @@
 import React, { Component } from 'react';
 import { Text } from 'react-native';
 import firebase from 'firebase';
-import { Button, Card, CardSection, Input } from './common';
+import { Button, Card, CardSection, Input, Spinner } from './common';
 
 class LoginForm extends Component {
   state = {
     email: '',
     password: '',
-    error: ''
+    error: '',
+    loading: false
   };
 
+
   onButtonPress() {
-    debugger;
     const { email, password } = this.state;
+
+    this.setState({ error: '', loading: true });
 
     // .auth() returns a promise
     // .catch deals with any failed attempts to login
     firebase.auth().signInWithEmailAndPassword(email, password)
+    .then(this.onLoginSuccess.bind(this))
     .catch(() => {
       // make account here
       firebase.auth().createUserWithEmailAndPassword(email, password)
-      .catch(() => {
-        this.setState({ error: 'Authentication Failed' });
-      });
+      .then(this.onLoginSuccess.bind(this))
+      .catch(this.onLoginFail.bind(this));
     });
+  }
+
+  onLoginFail() {
+    this.setState({ error: 'Authentication Failed', loading: false });
+  }
+
+  onLoginSuccess() {
+    this.setState({ email: '', password: '', loading: false, error: '' });
+  }
+
+  renderButton() {
+    if (this.state.loading) {
+      return <Spinner size="small" />;
+    }
+    return (
+      <Button onPress={this.onButtonPress.bind(this)}>
+        Log in
+      </Button>
+    );
   }
 
   render() {
@@ -32,7 +54,7 @@ class LoginForm extends Component {
         <CardSection>
           <Input
             placeholder="example@gmail.com"
-            label='Email'
+            label="Email"
             value={this.state.email}
             onChangeText={email => this.setState({ email })}
           />
@@ -53,9 +75,7 @@ class LoginForm extends Component {
         </Text>
 
         <CardSection>
-          <Button onPress={this.onButtonPress.bind(this)}>
-            Log in
-          </Button>
+          {this.renderButton()}
         </CardSection>
       </Card>
     );
